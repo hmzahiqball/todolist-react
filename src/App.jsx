@@ -4,7 +4,6 @@ import {
   Box,
   Center,
   Stack,
-  Text,
   Span,
   Button,
   CloseButton,
@@ -17,7 +16,27 @@ import {
 import { useState } from "react";
 
 export default function App() {
-  const [value] = useState(["a"]);
+  const [items, setItems] = useState([]);
+  const [judul, setJudul] = useState("");
+  const [detail, setDetail] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleSave = () => {
+    if (!judul.trim()) return;
+    const newItem = {
+      value: Date.now().toString(),
+      title: judul,
+      text: detail,
+    };
+    setItems((prev) => [...prev, newItem]);
+    setJudul("");
+    setDetail("");
+    setIsOpen(false);
+  };
+
+  const handleDelete = (value) => {
+    setItems((prev) => prev.filter((item) => item.value !== value));
+  };
 
   return (
     <Center minH="100vh" flexDirection="column" gap="4">
@@ -33,7 +52,7 @@ export default function App() {
       </Heading>
 
       {/* Tombol dialog di atas box */}
-      <Dialog.Root motionPreset="slide-in-bottom">
+      <Dialog.Root open={isOpen} onOpenChange={setIsOpen} motionPreset="slide-in-bottom">
         <Dialog.Trigger asChild>
           <Button
             colorPalette="purple"
@@ -52,15 +71,30 @@ export default function App() {
               </Dialog.Header>
               <Dialog.Body>
                 <Stack spacing="4">
-                  <Input placeholder="Judul Kegiatan" />
-                  <Textarea placeholder="Detail Kegiatan" rows={4} />
+                  <Input
+                    placeholder="Judul Kegiatan"
+                    value={judul}
+                    onChange={(e) => setJudul(e.target.value)}
+                  />
+                  <Textarea
+                    placeholder="Detail Kegiatan"
+                    rows={4}
+                    value={detail}
+                    onChange={(e) => setDetail(e.target.value)}
+                  />
                 </Stack>
               </Dialog.Body>
               <Dialog.Footer>
                 <Dialog.ActionTrigger asChild>
                   <Button variant="outline">Cancel</Button>
                 </Dialog.ActionTrigger>
-                <Button colorPalette="purple" variant="outline">Save</Button>
+                <Button
+                  colorPalette="purple"
+                  variant="outline"
+                  onClick={handleSave}
+                >
+                  Save
+                </Button>
               </Dialog.Footer>
               <Dialog.CloseTrigger asChild>
                 <CloseButton size="sm" />
@@ -85,25 +119,29 @@ export default function App() {
             spaceY="4"
             variant="plain"
             collapsible
-            defaultValue={["a"]}
+            defaultValue={[]}
           >
             {items.map((item, index) => (
-              <Accordion.Item key={index} value={item.value}>
-              <Box position="relative">
-                <Accordion.ItemTrigger>
-                  <Span flex="1">{item.title}</Span>
-                  <Accordion.ItemIndicator />
-                </Accordion.ItemTrigger>
-                <AbsoluteCenter axis="vertical" insetEnd="0">
-                  <Button variant="subtle" colorPalette="red">
-                    Delete
-                  </Button>
-                </AbsoluteCenter>
-              </Box>
-              <Accordion.ItemContent>
-                <Accordion.ItemBody>{item.text}</Accordion.ItemBody>
-              </Accordion.ItemContent>
-            </Accordion.Item>
+              <Accordion.Item key={item.value} value={item.value}>
+                <Box position="relative">
+                  <Accordion.ItemTrigger>
+                    <Span flex="1">{item.title}</Span>
+                    <Accordion.ItemIndicator />
+                  </Accordion.ItemTrigger>
+                  <AbsoluteCenter axis="vertical" insetEnd="0">
+                    <Button
+                      variant="subtle"
+                      colorPalette="red"
+                      onClick={() => handleDelete(item.value)}
+                    >
+                      Delete
+                    </Button>
+                  </AbsoluteCenter>
+                </Box>
+                <Accordion.ItemContent>
+                  <Accordion.ItemBody>{item.text}</Accordion.ItemBody>
+                </Accordion.ItemContent>
+              </Accordion.Item>
             ))}
           </Accordion.Root>
         </Stack>
@@ -111,9 +149,3 @@ export default function App() {
     </Center>
   );
 }
-
-const items = [
-  { value: "a", title: "First Item", text: "Lorem Ipsum" },
-  { value: "b", title: "Second Item", text: "Lorem Ipsum" },
-  { value: "c", title: "Third Item", text: "Lorem Ipsum" },
-];
