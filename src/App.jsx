@@ -12,25 +12,44 @@ import {
   Input,
   Textarea,
   Heading,
+  Text,
 } from "@chakra-ui/react";
 import { useState } from "react";
 
 export default function App() {
   const [items, setItems] = useState([]);
-  const [judul, setJudul] = useState("");
-  const [detail, setDetail] = useState("");
+  const [form, setForm] = useState({
+    title: "",
+    detail: "",
+    date: "",
+    startTime: "",
+    endTime: "",
+    location: "",
+  });
   const [isOpen, setIsOpen] = useState(false);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSave = () => {
-    if (!judul.trim()) return;
+    if (!form.title.trim()) return;
+
     const newItem = {
+      ...form,
       value: Date.now().toString(),
-      title: judul,
-      text: detail,
     };
+
     setItems((prev) => [...prev, newItem]);
-    setJudul("");
-    setDetail("");
+    setForm({
+      title: "",
+      detail: "",
+      date: "",
+      startTime: "",
+      endTime: "",
+      location: "",
+    });
     setIsOpen(false);
   };
 
@@ -40,7 +59,7 @@ export default function App() {
 
   return (
     <Center minH="100vh" flexDirection="column" gap="4">
-      {/* Judul dengan efek glow */}
+      {/* Judul */}
       <Heading
         fontSize="3xl"
         fontWeight="bold"
@@ -51,7 +70,7 @@ export default function App() {
         To-Do List App
       </Heading>
 
-      {/* Tombol dialog di atas box */}
+      {/* Dialog Tambah */}
       <Dialog.Root open={isOpen} onOpenChange={setIsOpen} motionPreset="slide-in-bottom">
         <Dialog.Trigger asChild>
           <Button
@@ -67,20 +86,48 @@ export default function App() {
           <Dialog.Positioner>
             <Dialog.Content>
               <Dialog.Header>
-                <Dialog.Title>Tambah To-do</Dialog.Title>
+                <Dialog.Title>Tambah Kegiatan</Dialog.Title>
               </Dialog.Header>
               <Dialog.Body>
-                <Stack spacing="4">
+                <Stack spacing="3">
                   <Input
                     placeholder="Judul Kegiatan"
-                    value={judul}
-                    onChange={(e) => setJudul(e.target.value)}
+                    name="title"
+                    value={form.title}
+                    onChange={handleChange}
                   />
                   <Textarea
                     placeholder="Detail Kegiatan"
-                    rows={4}
-                    value={detail}
-                    onChange={(e) => setDetail(e.target.value)}
+                    rows={3}
+                    name="detail"
+                    value={form.detail}
+                    onChange={handleChange}
+                  />
+                  <Input
+                    type="date"
+                    name="date"
+                    value={form.date}
+                    onChange={handleChange}
+                  />
+                  <Input
+                    type="time"
+                    placeholder="Jam Mulai"
+                    name="startTime"
+                    value={form.startTime}
+                    onChange={handleChange}
+                  />
+                  <Input
+                    type="time"
+                    placeholder="Jam Beres"
+                    name="endTime"
+                    value={form.endTime}
+                    onChange={handleChange}
+                  />
+                  <Input
+                    placeholder="Tempat"
+                    name="location"
+                    value={form.location}
+                    onChange={handleChange}
                   />
                 </Stack>
               </Dialog.Body>
@@ -104,7 +151,7 @@ export default function App() {
         </Portal>
       </Dialog.Root>
 
-      {/* Box dengan accordion */}
+      {/* Accordion Box */}
       <Box
         w="full"
         maxW="md"
@@ -115,13 +162,8 @@ export default function App() {
         _dark={{ boxShadow: "0 0 10px 0 rgba(136, 85, 255, 0.8)" }}
       >
         <Stack gap="4">
-          <Accordion.Root
-            spaceY="4"
-            variant="plain"
-            collapsible
-            defaultValue={[]}
-          >
-            {items.map((item, index) => (
+          <Accordion.Root variant="plain" collapsible defaultValue={[]}>
+            {items.map((item) => (
               <Accordion.Item key={item.value} value={item.value}>
                 <Box position="relative">
                   <Accordion.ItemTrigger>
@@ -130,6 +172,7 @@ export default function App() {
                   </Accordion.ItemTrigger>
                   <AbsoluteCenter axis="vertical" insetEnd="0">
                     <Button
+                      size="xs"
                       variant="subtle"
                       colorPalette="red"
                       onClick={() => handleDelete(item.value)}
@@ -139,7 +182,14 @@ export default function App() {
                   </AbsoluteCenter>
                 </Box>
                 <Accordion.ItemContent>
-                  <Accordion.ItemBody>{item.text}</Accordion.ItemBody>
+                  <Accordion.ItemBody>
+                    <Stack spacing="2" fontSize="sm">
+                      <Text><strong>Detail:</strong> {item.detail}</Text>
+                      <Text><strong>Tanggal:</strong> {item.date}</Text>
+                      <Text><strong>Jam:</strong> {item.startTime} - {item.endTime}</Text>
+                      <Text><strong>Tempat:</strong> {item.location}</Text>
+                    </Stack>
+                  </Accordion.ItemBody>
                 </Accordion.ItemContent>
               </Accordion.Item>
             ))}
