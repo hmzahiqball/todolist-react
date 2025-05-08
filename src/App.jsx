@@ -45,7 +45,7 @@ export default function App() {
     setForm({
       title: "",
       detail: "",
-      date: "",
+      date: new Date().toISOString().slice(0, 10),
       startTime: "",
       endTime: "",
       location: "",
@@ -106,7 +106,7 @@ export default function App() {
                   <Input
                     type="date"
                     name="date"
-                    value={form.date}
+                    value={new Date().toISOString().slice(0, 10)}
                     onChange={handleChange}
                   />
                   <Input
