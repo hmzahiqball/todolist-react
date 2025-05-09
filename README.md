@@ -1,12 +1,53 @@
-# React + Vite
+# 📝 To-Do List App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplikasi **To-Do List** sederhana namun lengkap, dirancang untuk membantu mengatur tugas harian Anda secara efisien. Aplikasi ini kini dilengkapi fitur checklist, prioritas tugas, filter pencarian, pengingat (reminder), dan kalender mini — tanpa mengubah tampilan atau fitur lama yang sudah familiar.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🌐 Demo
 
-## Expanding the ESLint configuration
+contoh: [Lihat Demo](https://put-todolist.netlify.app)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## ✨ Fitur Utama
+
+- ✅ **Checklist Selesai**  
+  Tandai tugas yang sudah selesai dengan mudah.
+
+- ⏫ **Prioritas Tugas**  
+  Tandai tugas sebagai *tinggi*, *sedang*, atau *rendah*.
+
+- 🔍 **Filter dan Pencarian**  
+  Filter berdasarkan status (selesai/belum) atau berdasarkan prioritas.
+
+- ⏰ **Reminder**  
+  Tambahkan pengingat untuk setiap tugas agar tidak terlewat.
+
+- 📅 **Kalender Mini**  
+  Navigasi tugas berdasarkan tanggal dalam tampilan kalender kecil.
+
+---
+
+## 🧱 Teknologi yang Digunakan
+
+- **Frontend**: React.JS
+- **Backend**: -
+- **Database**: LocalStorage
+
+---
+
+## 🚀 Instalasi dan Penggunaan
+
+### 🔧 1. Clone Repository
+
+```bash
+git clone https://github.com/username/todo-list-app.git
+cd todo-list-app
+```
+
+### 🖥️ 2. Jalankan Secara Lokal
+```bash
+npm install
+npm run dev
+```
