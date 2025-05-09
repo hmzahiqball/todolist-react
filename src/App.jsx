@@ -24,9 +24,8 @@ import { useEffect, useState, useRef } from "react";
 import { toaster } from "./components/ui/toaster";
 
 export default function App() {
-
   const closeDialogRef = useRef(null);
-  const dialogRef = useRef<HTMLDivElement>(null)
+  const dialogRef = useRef(null);
 
   const [todos, setTodos] = useState(() => {
     const savedTodos = localStorage.getItem("todos");
@@ -34,13 +33,26 @@ export default function App() {
   });
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
-  const [priority, setPriority] = useState("Low");
+  const [priority, setPriority] = useState("High");
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [location, setLocation] = useState("");
-  const [filter, setFilter] = useState({ priority: "High", date: "" });
+  const [filter, setFilter] = useState({
+    priority: "All",
+    startDate: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 1)).toISOString().split('T')[0],
+    endDate: new Date(new Date().setDate(new Date().getDate() + (7 - new Date().getDay()))).toISOString().split('T')[0]
+  });
   
+  // Lista prioritas untuk RadioCard
+  const listPriority = createListCollection({
+    items: [
+      { label: "All", value: "All" },
+      { label: "Low", value: "Low" },
+      { label: "Medium", value: "Medium" },
+      { label: "High", value: "High" },
+    ],
+  });
 
   const handleAddTodo = () => {
     if (!title) return;
@@ -90,9 +102,15 @@ export default function App() {
   };
 
   const filteredTodos = todos.filter((todo) => {
+    // Filter berdasarkan prioritas
     if (filter.priority !== "All" && todo.priority !== filter.priority)
       return false;
-    if (filter.date && todo.date !== filter.date) return false;
+    
+    // Filter berdasarkan rentang tanggal
+    if (filter.startDate && filter.endDate && todo.date) {
+      return todo.date >= filter.startDate && todo.date <= filter.endDate;
+    }
+    
     return true;
   });
 
@@ -118,7 +136,7 @@ export default function App() {
       }
     }, 30000);
     return () => clearInterval(interval);
-  }, [todos, toaster]);
+  }, [todos]);
 
   const handleDeleteTodo = (id) => {
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
@@ -136,34 +154,45 @@ export default function App() {
         To-Do List App
       </Heading>
 
-      <Grid gap={2} templateColumns="repeat(2, 1fr)" alignItems="center">
+      {/* Filter Container */}
+      <Stack spacing={4} width="full" maxW="md">
         <RadioCard.Root
+          id="priority-filter"
           value={filter.priority}
-          onValueChange={(val) => {
-            console.log("priority changed to", val);
-            setFilter((prev) => ({ ...prev, priority: val }));
-          }}
-          h="full"
+          onValueChange={(val) => setFilter((prev) => ({ ...prev, priority: val }))}
         >
-          <HStack align="stretch" h="full">
-            {["All", "Low", "Medium", "High"].map((p) => (
-              <RadioCard.Item key={p} value={p}>
+          <HStack align="stretch" wrap="wrap">
+            {listPriority.items.map((p) => (
+              <RadioCard.Item key={p.value} value={p.value}>
                 <RadioCard.ItemHiddenInput />
                 <RadioCard.ItemControl>
-                  <RadioCard.ItemText>{p}</RadioCard.ItemText>
+                  <RadioCard.ItemText>{p.label}</RadioCard.ItemText>
                   <RadioCard.ItemIndicator />
                 </RadioCard.ItemControl>
               </RadioCard.Item>
             ))}
           </HStack>
         </RadioCard.Root>
-        <Input
-          type="date"
-          value={filter.date}
-          onChange={(e) => setFilter({ ...filter, date: e.target.value })}
-          h="full"
-        />
-      </Grid>
+        
+        <Grid gap={2} templateColumns="repeat(2, 1fr)" alignItems="center">
+          <Box>
+            <Input
+              id="start-date"
+              type="date"
+              value={filter.startDate}
+              onChange={(e) => setFilter(prev => ({ ...prev, startDate: e.target.value }))}
+            />
+          </Box>
+          <Box>
+            <Input
+              id="end-date"
+              type="date"
+              value={filter.endDate}
+              onChange={(e) => setFilter(prev => ({ ...prev, endDate: e.target.value }))}
+            />
+          </Box>
+        </Grid>
+      </Stack>
 
       <Dialog.Root motionPreset="slide-in-bottom">
         <Dialog.Trigger asChild>
@@ -196,10 +225,10 @@ export default function App() {
                     onChange={(e) => setDetail(e.target.value)}
                   />
                   <RadioCard.Root
+                    id="priority-select"
                     value={priority}
-                    onValueChange={setPriority}
+                    onValueChange={(val) => setPriority(val)}
                   >
-                    <RadioCard.Label>Pilih Prioritas</RadioCard.Label>
                     <HStack align="stretch" wrap="wrap">
                       {listPriority.items
                         .filter((item) => item.value !== "All") // hilangkan "All" dari form input
@@ -302,7 +331,7 @@ export default function App() {
                   <Accordion.ItemBody>
                     <Text>{item.detail}</Text>
                     <Text fontSize="sm" mt={2} color="gray.500">
-                      Tanggal: {item.date || "-"}, Jam: {item.startTime} - {item.endTime}<br />
+                      Tanggal: {item.date || "-"}, Jam: {item.startTime || "-"} - {item.endTime || "-"}<br />
                       Tempat: {item.location || "-"}, Prioritas: {item.priority}
                     </Text>
                   </Accordion.ItemBody>
@@ -347,12 +376,3 @@ export default function App() {
     </Center>
   );
 }
-
-const listPriority = createListCollection({
-  items: [
-    { label: "All", value: "All" },
-    { label: "Low", value: "Low" },
-    { label: "Medium", value: "Medium" },
-    { label: "High", value: "High" },
-  ],
-})
