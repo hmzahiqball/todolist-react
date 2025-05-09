@@ -6,7 +6,7 @@ Aplikasi **To-Do List** sederhana namun lengkap, dirancang untuk membantu mengat
 
 ## 🌐 Demo
 
-contoh: [Lihat Demo](https://put-todolist.netlify.app)
+Contoh: [Lihat Demo](https://put-todolist.netlify.app)
 
 ---
 
