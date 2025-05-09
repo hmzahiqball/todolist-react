@@ -4,6 +4,7 @@ import {
   Box,
   Center,
   Stack,
+  Text,
   Span,
   Button,
   CloseButton,
@@ -12,54 +13,111 @@ import {
   Input,
   Textarea,
   Heading,
-  Text,
+  Select,
+  Checkbox,
+  Grid,
+  createListCollection
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { toaster } from "./components/ui/toaster";
 
 export default function App() {
-  const [items, setItems] = useState([]);
-  const [form, setForm] = useState({
-    title: "",
-    detail: "",
-    date: "",
-    startTime: "",
-    endTime: "",
-    location: "",
+  
+  const dialogRef = useRef<HTMLDivElement>(null)
+
+  const [todos, setTodos] = useState(() => {
+    const savedTodos = localStorage.getItem("todos");
+    return savedTodos ? JSON.parse(savedTodos) : [];
   });
-  const [isOpen, setIsOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [detail, setDetail] = useState("");
+  const [priority, setPriority] = useState("Low");
+  const [date, setDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [location, setLocation] = useState("");
+  const [filter, setFilter] = useState({ priority: "All", date: "" });
+  
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSave = () => {
-    if (!form.title.trim()) return;
-
-    const newItem = {
-      ...form,
-      value: Date.now().toString(),
+  const handleAddTodo = () => {
+    if (!title) return;
+    const newTodo = {
+      id: Date.now(),
+      title,
+      detail,
+      priority,
+      date,
+      startTime,
+      endTime,
+      location,
+      checked: false,
     };
-
-    setItems((prev) => [...prev, newItem]);
-    setForm({
-      title: "",
-      detail: "",
-      date: new Date().toISOString().slice(0, 10),
-      startTime: "",
-      endTime: "",
-      location: "",
-    });
-    setIsOpen(false);
+    setTodos((prev) => [...prev, newTodo]);
+    setTitle("");
+    setDetail("");
+    setPriority("Low");
+    setDate("");
+    setStartTime("");
+    setEndTime("");
+    setLocation("");
   };
 
-  const handleDelete = (value) => {
-    setItems((prev) => prev.filter((item) => item.value !== value));
+  useEffect(() => {
+    const savedTodos = localStorage.getItem("todos");
+    if (savedTodos) {
+      setTodos(JSON.parse(savedTodos));
+    }
+  }, []);
+  
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
+  const toggleChecked = (id) => {
+    setTodos((prev) =>
+      prev.map((todo) =>
+        todo.id === id ? { ...todo, checked: !todo.checked } : todo
+      )
+    );
+  };
+
+  const filteredTodos = todos.filter((todo) => {
+    if (filter.priority !== "All" && todo.priority !== filter.priority)
+      return false;
+    if (filter.date && todo.date !== filter.date) return false;
+    return true;
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const upcoming = todos.find((todo) => {
+        if (!todo.date || !todo.startTime) return false;
+        const reminderTime = new Date(`${todo.date}T${todo.startTime}`);
+        return (
+          !todo.checked &&
+          reminderTime - now > 0 &&
+          reminderTime - now < 60000 // within 1 minute
+        );
+      });
+      if (upcoming) {
+        toaster.create({
+          title: "Upcoming Task",
+          description: upcoming.title,
+          type: "info",
+          duration: 5000,
+        });
+      }
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [todos, toaster]);
+
+  const handleDeleteTodo = (id) => {
+    setTodos((prev) => prev.filter((todo) => todo.id !== id));
   };
 
   return (
     <Center minH="100vh" flexDirection="column" gap="4">
-      {/* Judul */}
       <Heading
         fontSize="3xl"
         fontWeight="bold"
@@ -70,8 +128,43 @@ export default function App() {
         To-Do List App
       </Heading>
 
-      {/* Dialog Tambah */}
-      <Dialog.Root open={isOpen} onOpenChange={setIsOpen} motionPreset="slide-in-bottom">
+      <Grid gap={2} templateColumns="repeat(2, 1fr)">
+      <Select.Root
+          collection={listPriority}
+          size="sm"
+          value={filter.priority}
+          onChange={(val) => setFilter({ ...filter, priority: val.value })}
+        >
+          <Select.HiddenSelect />
+          <Select.Control>
+            <Select.Trigger>
+              <Select.ValueText placeholder="Select priority" />
+            </Select.Trigger>
+            <Select.IndicatorGroup>
+              <Select.Indicator />
+            </Select.IndicatorGroup>
+          </Select.Control>
+          <Portal>
+            <Select.Positioner>
+            <Select.Content>
+              {listPriority.items.map((list) => (
+                <Select.Item item={list} key={list.value}>
+                  {list.label}
+                  <Select.ItemIndicator />
+                </Select.Item>
+              ))}
+            </Select.Content>
+            </Select.Positioner>
+          </Portal>
+        </Select.Root>
+        <Input
+          type="date"
+          value={filter.date}
+          onChange={(e) => setFilter({ ...filter, date: e.target.value })}
+        />
+      </Grid>
+
+      <Dialog.Root motionPreset="slide-in-bottom">
         <Dialog.Trigger asChild>
           <Button
             colorPalette="purple"
@@ -84,50 +177,68 @@ export default function App() {
         <Portal>
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content>
+            <Dialog.Content ref={dialogRef}>
               <Dialog.Header>
-                <Dialog.Title>Tambah Kegiatan</Dialog.Title>
+                <Dialog.Title>Tambah To-do</Dialog.Title>
               </Dialog.Header>
               <Dialog.Body>
-                <Stack spacing="3">
+                <Stack spacing="4">
                   <Input
                     placeholder="Judul Kegiatan"
-                    name="title"
-                    value={form.title}
-                    onChange={handleChange}
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
                   />
                   <Textarea
                     placeholder="Detail Kegiatan"
-                    rows={3}
-                    name="detail"
-                    value={form.detail}
-                    onChange={handleChange}
+                    rows={4}
+                    value={detail}
+                    onChange={(e) => setDetail(e.target.value)}
+                  />
+                  <Select.Root
+                    collection={listPriority}
+                    size="sm"
+                    value={priority}
+                    onChange={(val) => setPriority(val.value)}
+                  >
+                    <Select.HiddenSelect />
+                    <Select.Control>
+                      <Select.Trigger>
+                        <Select.ValueText placeholder="Select priority" />
+                      </Select.Trigger>
+                      <Select.IndicatorGroup>
+                        <Select.Indicator />
+                      </Select.IndicatorGroup>
+                    </Select.Control>
+                    <Select.Positioner>
+                      <Select.Content>
+                        {listPriority.items.slice(1).map((list) => (
+                          <Select.Item item={list} key={list.value}>
+                            {list.label}
+                            <Select.ItemIndicator />
+                          </Select.Item>
+                        ))}
+                      </Select.Content>
+                      </Select.Positioner>
+                  </Select.Root>
+                  <Input
+                    placeholder="Tempat"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
                   />
                   <Input
                     type="date"
-                    name="date"
-                    value={new Date().toISOString().slice(0, 10)}
-                    onChange={handleChange}
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
                   />
                   <Input
                     type="time"
-                    placeholder="Jam Mulai"
-                    name="startTime"
-                    value={form.startTime}
-                    onChange={handleChange}
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
                   />
                   <Input
                     type="time"
-                    placeholder="Jam Beres"
-                    name="endTime"
-                    value={form.endTime}
-                    onChange={handleChange}
-                  />
-                  <Input
-                    placeholder="Tempat"
-                    name="location"
-                    value={form.location}
-                    onChange={handleChange}
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
                   />
                 </Stack>
               </Dialog.Body>
@@ -138,7 +249,7 @@ export default function App() {
                 <Button
                   colorPalette="purple"
                   variant="outline"
-                  onClick={handleSave}
+                  onClick={handleAddTodo}
                 >
                   Save
                 </Button>
@@ -151,7 +262,6 @@ export default function App() {
         </Portal>
       </Dialog.Root>
 
-      {/* Accordion Box */}
       <Box
         w="full"
         maxW="md"
@@ -162,33 +272,45 @@ export default function App() {
         _dark={{ boxShadow: "0 0 10px 0 rgba(136, 85, 255, 0.8)" }}
       >
         <Stack gap="4">
-          <Accordion.Root variant="plain" collapsible defaultValue={[]}>
-            {items.map((item) => (
-              <Accordion.Item key={item.value} value={item.value}>
+          <Accordion.Root
+            spaceY="4"
+            variant="plain"
+            collapsible
+            defaultValue={[]}
+          >
+            {filteredTodos.map((item) => (
+              <Accordion.Item key={item.id} value={String(item.id)}>
                 <Box position="relative">
                   <Accordion.ItemTrigger>
+                    <Checkbox.Root>
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control
+                        isChecked={item.checked}
+                        onChange={() => toggleChecked(item.id)}
+                      />
+                      <Checkbox.Label />
+                    </Checkbox.Root>
                     <Span flex="1">{item.title}</Span>
                     <Accordion.ItemIndicator />
                   </Accordion.ItemTrigger>
                   <AbsoluteCenter axis="vertical" insetEnd="0">
-                    <Button
-                      size="xs"
-                      variant="subtle"
-                      colorPalette="red"
-                      onClick={() => handleDelete(item.value)}
-                    >
-                      Delete
-                    </Button>
+                  <Button
+                    size="xs"
+                    colorPalette="red"
+                    variant="subtle"
+                    onClick={() => handleDeleteTodo(item.id)}
+                  >
+                    Delete
+                  </Button>
                   </AbsoluteCenter>
                 </Box>
                 <Accordion.ItemContent>
                   <Accordion.ItemBody>
-                    <Stack spacing="2" fontSize="sm">
-                      <Text><strong>Detail:</strong> {item.detail}</Text>
-                      <Text><strong>Tanggal:</strong> {item.date}</Text>
-                      <Text><strong>Jam:</strong> {item.startTime} - {item.endTime}</Text>
-                      <Text><strong>Tempat:</strong> {item.location}</Text>
-                    </Stack>
+                    <Text>{item.detail}</Text>
+                    <Text fontSize="sm" mt={2} color="gray.500">
+                      Tanggal: {item.date || "-"}, Jam: {item.startTime} - {item.endTime}<br />
+                      Tempat: {item.location || "-"}, Prioritas: {item.priority}
+                    </Text>
                   </Accordion.ItemBody>
                 </Accordion.ItemContent>
               </Accordion.Item>
@@ -196,6 +318,47 @@ export default function App() {
           </Accordion.Root>
         </Stack>
       </Box>
+
+      {/* Kalender Mini */}
+      <Box
+        position="fixed"
+        bottom="4"
+        right="4"
+        w="xs"
+        shadow="md"
+        borderWidth="1px"
+        borderRadius="lg"
+        p="4"
+        zIndex="100"
+      >
+        <Text fontWeight="bold" mb="2">
+          Kalender
+        </Text>
+        <Stack spacing="2">
+          {todos
+            .filter((todo) => todo.date)
+            .sort((a, b) => a.date.localeCompare(b.date))
+            .map((todo) => (
+              <Box key={todo.id} fontSize="sm">
+                <Text fontWeight="semibold">
+                  {todo.date
+                    .split("-")
+                    .reverse()
+                    .join("-")} - {todo.title}
+                </Text>
+              </Box>
+            ))}
+        </Stack>
+      </Box>
     </Center>
   );
 }
+
+const listPriority = createListCollection({
+  items: [
+    { label: "All", value: "All" },
+    { label: "Low", value: "Low" },
+    { label: "Medium", value: "Medium" },
+    { label: "High", value: "High" },
+  ],
+})
