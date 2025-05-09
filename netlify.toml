@@ -1,0 +1,12 @@
+[build]
+  command = "npm run build"  # Perintah untuk membuild proyek
+  publish = "build"          # Direktori tempat file build akan disimpan (gunakan "dist" jika pakai Vite)
+
+[build.environment]
+  NODE_ENV = "production"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = true
