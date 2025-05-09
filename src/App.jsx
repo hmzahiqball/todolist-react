@@ -44,7 +44,6 @@ export default function App() {
     endDate: new Date(new Date().setDate(new Date().getDate() + (7 - new Date().getDay()))).toISOString().split('T')[0]
   });
   
-  // Lista prioritas untuk RadioCard
   const listPriority = createListCollection({
     items: [
       { label: "All", value: "All" },
@@ -76,7 +75,6 @@ export default function App() {
     setEndTime("");
     setLocation("");
 
-    // Tutup dialog
     if (closeDialogRef.current) {
       closeDialogRef.current.click();
     }
@@ -103,11 +101,9 @@ export default function App() {
   };
 
   const filteredTodos = todos.filter((todo) => {
-    // Filter berdasarkan prioritas
     if (filter.priority !== "All" && todo.priority !== filter.priority)
       return false;
     
-    // Filter berdasarkan rentang tanggal
     if (filter.startDate && filter.endDate && todo.date) {
       return todo.date >= filter.startDate && todo.date <= filter.endDate;
     }
@@ -117,30 +113,28 @@ export default function App() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-    const now = new Date();
+      const now = new Date();
 
-    todos.forEach((todo) => {
-      if (!todo.date || !todo.startTime || todo.checked) return;
+      todos.forEach((todo) => {
+        if (!todo.date || !todo.startTime || todo.checked) return;
 
-      const reminderTime = new Date(`${todo.date}T${todo.startTime}`);
-      const timeDiff = reminderTime - now;
+        const reminderTime = new Date(`${todo.date}T${todo.startTime}`);
+        const timeDiff = reminderTime - now;
 
-      if (timeDiff > 0 && timeDiff < 600000 && !todo.notified) {
-        console.log(`Upcoming task: ${todo.title} will start in less than 10 minutes.`);
+        if (timeDiff > 0 && timeDiff < 600000 && !todo.notified) {
+          console.log(`Upcoming task: ${todo.title} will start in less than 10 minutes.`);
 
-        // Tampilkan toaster
-        toaster.create({
-          title: "Upcoming Task",
-          description: todo.title,
-          type: "error",
-          duration: 30000,
-        });
+          toaster.create({
+            title: "Upcoming Task",
+            description: todo.title,
+            type: "error",
+            duration: 30000,
+          });
 
-        // Tandai todo agar tidak di-notify lagi (opsional, tergantung struktur state Anda)
-        todo.notified = true; // Anda perlu simpan ke state jika ingin persist
-      }
-    });
-  }, 1000);
+          todo.notified = true;
+        }
+      });
+    }, 1000);
     return () => clearInterval(interval);
   }, [todos]);
 
@@ -149,9 +143,9 @@ export default function App() {
   };
 
   return (
-    <Center minH="100vh" flexDirection="column" gap="4">
+    <Center minH="100vh" flexDirection="column" gap="4" p={{ base: "4", md: "6" }}>
       <Heading
-        fontSize="3xl"
+        fontSize={{ base: "2xl", md: "3xl" }}
         fontWeight="bold"
         color="purple.400"
         textAlign="center"
@@ -160,7 +154,6 @@ export default function App() {
         To-Do List App
       </Heading>
 
-      {/* Filter Container */}
       <Stack spacing={4} width="full" maxW="md">
         <RadioCard.Root
           id="priority-filter"
@@ -182,7 +175,7 @@ export default function App() {
           </HStack>
         </RadioCard.Root>
         
-        <Grid gap={2} templateColumns="repeat(2, 1fr)" alignItems="center">
+        <Grid gap={2} templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} alignItems="center">
           <Box>
             <Input
               id="start-date"
@@ -241,7 +234,7 @@ export default function App() {
                   >
                     <HStack align="stretch" wrap="wrap">
                       {listPriority.items
-                        .filter((item) => item.value !== "All") // hilangkan "All" dari form input
+                        .filter((item) => item.value !== "All")
                         .map((item) => (
                           <RadioCard.Item key={item.value} value={item.value}>
                             <RadioCard.ItemHiddenInput />
@@ -277,7 +270,7 @@ export default function App() {
               </Dialog.Body>
               <Dialog.Footer>
                 <Dialog.ActionTrigger asChild>
-                  <Button variant="outline">Cancel</Button>
+                  <Button variant="outline">Cancel</ Button>
                 </Dialog.ActionTrigger>
                 <Button
                   colorPalette="purple"
@@ -298,7 +291,7 @@ export default function App() {
       <Box
         w="full"
         maxW="md"
-        p="6"
+        p={{ base: "4", md: "6" }}
         borderWidth="1px"
         borderRadius="lg"
         boxShadow="md"
@@ -327,14 +320,14 @@ export default function App() {
                     <Accordion.ItemIndicator />
                   </Accordion.ItemTrigger>
                   <AbsoluteCenter axis="vertical" insetEnd="0">
-                  <Button
-                    size="xs"
-                    colorPalette="red"
-                    variant="subtle"
-                    onClick={() => handleDeleteTodo(item.id)}
-                  >
-                    Delete
-                  </Button>
+                    <Button
+                      size="xs"
+                      colorPalette="red"
+                      variant="subtle"
+                      onClick={() => handleDeleteTodo(item.id)}
+                    >
+                      Delete
+                    </Button>
                   </AbsoluteCenter>
                 </Box>
                 <Accordion.ItemContent>
@@ -352,12 +345,14 @@ export default function App() {
         </Stack>
       </Box>
 
-      {/* Kalender Mini */}
       <Box
         position="fixed"
         bottom="4"
-        right="4"
-        w="xs"
+        right={{ base: "auto", md: "4" }}
+        left={{ base: "auto", md: "auto" }}
+        mx={{ base: "auto", md: "0" }}
+        w="full"
+        maxW={{ base: "sm", md: "xs" }}
         shadow="md"
         borderWidth="1px"
         borderRadius="lg"
@@ -377,7 +372,8 @@ export default function App() {
                   {todo.date
                     .split("-")
                     .reverse()
-                    .join("-")} - {todo.title}
+                    .join("-")}{" "}
+                  - {todo.title}
                 </Text>
               </Box>
             ))}
@@ -385,4 +381,4 @@ export default function App() {
       </Box>
     </Center>
   );
-}
+} 
