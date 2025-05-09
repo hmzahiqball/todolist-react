@@ -87,6 +87,7 @@ export default function App() {
     if (savedTodos) {
       setTodos(JSON.parse(savedTodos));
     }
+    console.log("Todos:", todos);
   }, []);
   
   useEffect(() => {
@@ -116,25 +117,30 @@ export default function App() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const now = new Date();
-      const upcoming = todos.find((todo) => {
-        if (!todo.date || !todo.startTime) return false;
-        const reminderTime = new Date(`${todo.date}T${todo.startTime}`);
-        return (
-          !todo.checked &&
-          reminderTime - now > 0 &&
-          reminderTime - now < 60000 // within 1 minute
-        );
-      });
-      if (upcoming) {
+    const now = new Date();
+
+    todos.forEach((todo) => {
+      if (!todo.date || !todo.startTime || todo.checked) return;
+
+      const reminderTime = new Date(`${todo.date}T${todo.startTime}`);
+      const timeDiff = reminderTime - now;
+
+      if (timeDiff > 0 && timeDiff < 600000 && !todo.notified) {
+        console.log(`Upcoming task: ${todo.title} will start in less than 10 minutes.`);
+
+        // Tampilkan toaster
         toaster.create({
           title: "Upcoming Task",
-          description: upcoming.title,
-          type: "info",
-          duration: 5000,
+          description: todo.title,
+          type: "error",
+          duration: 30000,
         });
+
+        // Tandai todo agar tidak di-notify lagi (opsional, tergantung struktur state Anda)
+        todo.notified = true; // Anda perlu simpan ke state jika ingin persist
       }
-    }, 30000);
+    });
+  }, 1000);
     return () => clearInterval(interval);
   }, [todos]);
 
@@ -312,7 +318,7 @@ export default function App() {
                     <Checkbox.Root>
                       <Checkbox.HiddenInput />
                       <Checkbox.Control
-                        isChecked={item.checked}
+                        checked={item.checked}
                         onChange={() => toggleChecked(item.id)}
                       />
                       <Checkbox.Label />
