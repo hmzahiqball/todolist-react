@@ -33,7 +33,7 @@ export default function App() {
   });
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
-  const [priority, setPriority] = useState("High");
+  const [priority, setPriority] = useState("");
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -159,7 +159,9 @@ export default function App() {
         <RadioCard.Root
           id="priority-filter"
           value={filter.priority}
-          onValueChange={(val) => setFilter((prev) => ({ ...prev, priority: val }))}
+          onValueChange={(val) => {
+            setFilter((prev) => ({ ...prev, priority: val.value }));
+          }}
         >
           <HStack align="stretch" wrap="wrap">
             {listPriority.items.map((p) => (
@@ -227,7 +229,9 @@ export default function App() {
                   <RadioCard.Root
                     id="priority-select"
                     value={priority}
-                    onValueChange={(val) => setPriority(val)}
+                    onValueChange={(val) => {
+                      setPriority(val.value);
+                    }}
                   >
                     <HStack align="stretch" wrap="wrap">
                       {listPriority.items
