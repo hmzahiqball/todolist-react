@@ -16,13 +16,16 @@ import {
   Select,
   Checkbox,
   Grid,
-  createListCollection
+  createListCollection,
+  HStack,
+  RadioCard
 } from "@chakra-ui/react";
 import { useEffect, useState, useRef } from "react";
 import { toaster } from "./components/ui/toaster";
 
 export default function App() {
-  
+
+  const closeDialogRef = useRef(null);
   const dialogRef = useRef<HTMLDivElement>(null)
 
   const [todos, setTodos] = useState(() => {
@@ -36,7 +39,7 @@ export default function App() {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [location, setLocation] = useState("");
-  const [filter, setFilter] = useState({ priority: "All", date: "" });
+  const [filter, setFilter] = useState({ priority: "High", date: "" });
   
 
   const handleAddTodo = () => {
@@ -60,6 +63,11 @@ export default function App() {
     setStartTime("");
     setEndTime("");
     setLocation("");
+
+    // Tutup dialog
+    if (closeDialogRef.current) {
+      closeDialogRef.current.click();
+    }
   };
 
   useEffect(() => {
@@ -128,39 +136,32 @@ export default function App() {
         To-Do List App
       </Heading>
 
-      <Grid gap={2} templateColumns="repeat(2, 1fr)">
-      <Select.Root
-          collection={listPriority}
-          size="sm"
+      <Grid gap={2} templateColumns="repeat(2, 1fr)" alignItems="center">
+        <RadioCard.Root
           value={filter.priority}
-          onChange={(val) => setFilter({ ...filter, priority: val.value })}
+          onValueChange={(val) => {
+            console.log("priority changed to", val);
+            setFilter((prev) => ({ ...prev, priority: val }));
+          }}
+          h="full"
         >
-          <Select.HiddenSelect />
-          <Select.Control>
-            <Select.Trigger>
-              <Select.ValueText placeholder="Select priority" />
-            </Select.Trigger>
-            <Select.IndicatorGroup>
-              <Select.Indicator />
-            </Select.IndicatorGroup>
-          </Select.Control>
-          <Portal>
-            <Select.Positioner>
-            <Select.Content>
-              {listPriority.items.map((list) => (
-                <Select.Item item={list} key={list.value}>
-                  {list.label}
-                  <Select.ItemIndicator />
-                </Select.Item>
-              ))}
-            </Select.Content>
-            </Select.Positioner>
-          </Portal>
-        </Select.Root>
+          <HStack align="stretch" h="full">
+            {["All", "Low", "Medium", "High"].map((p) => (
+              <RadioCard.Item key={p} value={p}>
+                <RadioCard.ItemHiddenInput />
+                <RadioCard.ItemControl>
+                  <RadioCard.ItemText>{p}</RadioCard.ItemText>
+                  <RadioCard.ItemIndicator />
+                </RadioCard.ItemControl>
+              </RadioCard.Item>
+            ))}
+          </HStack>
+        </RadioCard.Root>
         <Input
           type="date"
           value={filter.date}
           onChange={(e) => setFilter({ ...filter, date: e.target.value })}
+          h="full"
         />
       </Grid>
 
@@ -194,32 +195,25 @@ export default function App() {
                     value={detail}
                     onChange={(e) => setDetail(e.target.value)}
                   />
-                  <Select.Root
-                    collection={listPriority}
-                    size="sm"
+                  <RadioCard.Root
                     value={priority}
-                    onChange={(val) => setPriority(val.value)}
+                    onValueChange={setPriority}
                   >
-                    <Select.HiddenSelect />
-                    <Select.Control>
-                      <Select.Trigger>
-                        <Select.ValueText placeholder="Select priority" />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Select.Positioner>
-                      <Select.Content>
-                        {listPriority.items.slice(1).map((list) => (
-                          <Select.Item item={list} key={list.value}>
-                            {list.label}
-                            <Select.ItemIndicator />
-                          </Select.Item>
+                    <RadioCard.Label>Pilih Prioritas</RadioCard.Label>
+                    <HStack align="stretch" wrap="wrap">
+                      {listPriority.items
+                        .filter((item) => item.value !== "All") // hilangkan "All" dari form input
+                        .map((item) => (
+                          <RadioCard.Item key={item.value} value={item.value}>
+                            <RadioCard.ItemHiddenInput />
+                            <RadioCard.ItemControl>
+                              <RadioCard.ItemText>{item.label}</RadioCard.ItemText>
+                              <RadioCard.ItemIndicator />
+                            </RadioCard.ItemControl>
+                          </RadioCard.Item>
                         ))}
-                      </Select.Content>
-                      </Select.Positioner>
-                  </Select.Root>
+                    </HStack>
+                  </RadioCard.Root>
                   <Input
                     placeholder="Tempat"
                     value={location}
@@ -255,7 +249,7 @@ export default function App() {
                 </Button>
               </Dialog.Footer>
               <Dialog.CloseTrigger asChild>
-                <CloseButton size="sm" />
+                <button ref={closeDialogRef} style={{ display: "none" }} />
               </Dialog.CloseTrigger>
             </Dialog.Content>
           </Dialog.Positioner>
