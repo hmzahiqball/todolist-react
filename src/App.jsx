@@ -210,17 +210,17 @@ export default function App() {
           <Dialog.Positioner>
             <Dialog.Content ref={dialogRef}>
               <Dialog.Header>
-                <Dialog.Title>Tambah To-do</Dialog.Title>
+                <Dialog.Title>Add To-do</Dialog.Title>
               </Dialog.Header>
               <Dialog.Body>
                 <Stack spacing="4">
                   <Input
-                    placeholder="Judul Kegiatan"
+                    placeholder="Title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                   />
                   <Textarea
-                    placeholder="Detail Kegiatan"
+                    placeholder="Detail"
                     rows={4}
                     value={detail}
                     onChange={(e) => setDetail(e.target.value)}
@@ -247,7 +247,7 @@ export default function App() {
                     </HStack>
                   </RadioCard.Root>
                   <Input
-                    placeholder="Tempat"
+                    placeholder="Place"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                   />
