@@ -1,53 +1,56 @@
 # 📝 To-Do List App
 
-Aplikasi **To-Do List** sederhana namun lengkap, dirancang untuk membantu mengatur tugas harian Anda secara efisien. Aplikasi ini kini dilengkapi fitur checklist, prioritas tugas, filter pencarian, pengingat (reminder), dan kalender mini — tanpa mengubah tampilan atau fitur lama yang sudah familiar.
+A simple yet complete To-Do List application, designed to help you manage your daily tasks efficiently. This app now includes powerful features like checklists, task priorities, filtering, reminders, and a mini calendar — all added without changing the familiar look and feel of the original interface.
+
+![Screenshot](public/screenshot.png)
+---
+
+## 🌐 Live Demo
+
+Example: [View Demo](https://put-todolist.netlify.app)
 
 ---
 
-## 🌐 Demo
+## ✨ Key Features
 
-Contoh: [Lihat Demo](https://put-todolist.netlify.app)
+- ✅ **Completion Checklist**  
+  Easily mark tasks as completed with a single click.
 
----
+- ⏫ **Task Priority**  
+  Set task priority as *high*, *medium*, or *low* to stay focused.
 
-## ✨ Fitur Utama
+- 🔍 **Filter & Search**  
+  Filter tasks by status (done/pending) or by priority level. Search tasks by keyword for quick access.
 
-- ✅ **Checklist Selesai**  
-  Tandai tugas yang sudah selesai dengan mudah.
+- ⏰ **Reminders**  
+  Add customizable reminders to stay on top of your deadlines.
 
-- ⏫ **Prioritas Tugas**  
-  Tandai tugas sebagai *tinggi*, *sedang*, atau *rendah*.
-
-- 🔍 **Filter dan Pencarian**  
-  Filter berdasarkan status (selesai/belum) atau berdasarkan prioritas.
-
-- ⏰ **Reminder**  
-  Tambahkan pengingat untuk setiap tugas agar tidak terlewat.
-
-- 📅 **Kalender Mini**  
-  Navigasi tugas berdasarkan tanggal dalam tampilan kalender kecil.
+- 📅 **Mini Calendar**  
+  Browse and manage tasks by date using an interactive mini calendar view.
 
 ---
 
-## 🧱 Teknologi yang Digunakan
+## 🧱 Tech Stack
 
 - **Frontend**: React.JS
-- **Backend**: -
-- **Database**: LocalStorage
+- **Backend**: - (Client-side only)
+- **Database**: LocalStorage (no external database required)
 
 ---
 
-## 🚀 Instalasi dan Penggunaan
+## 🚀 Installation & Usage
 
-### 🔧 1. Clone Repository
+### 🔧 1. Clone the Repository
 
 ```bash
 git clone https://github.com/username/todo-list-app.git
 cd todo-list-app
 ```
 
-### 🖥️ 2. Jalankan Secara Lokal
+### 🖥️ 2. Run Locally
 ```bash
 npm install
 npm run dev
 ```
+
+The app will start running on http://localhost:5173 (or another port, depending on your setup).
